@@ -10,7 +10,6 @@ def read_root():
 def read_item(item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
 
-
 @app.get("/test")
 def test_endpoint():
     return {"message": "This is a test endpoint"}
