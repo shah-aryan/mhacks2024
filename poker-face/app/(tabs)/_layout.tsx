@@ -3,16 +3,15 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 import { NavigationContainer } from "@react-navigation/native";
 import GameplayScreen from "./Gameplay"
 import MetricsScreen from "./Metric"
-import HomeScreen from "./Home"
+import HomeScreen from "."
 import { Ionicons, FontAwesome6, Entypo } from "@expo/vector-icons";
 import { Colors } from '@/constants/Colors';
 const Tab = createMaterialBottomTabNavigator();
 
 const AppNavigator = () => {
   return (
-    // <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Navigation"
+        initialRouteName="Dashboard"
         sceneAnimationEnabled="true"
         activeColor={Colors.tabcolor}
         inactiveColor={Colors.inactiveColor}
@@ -59,7 +58,6 @@ const AppNavigator = () => {
           }}
         />
       </Tab.Navigator>
-    // </NavigationContainer>
   );
 };
 
