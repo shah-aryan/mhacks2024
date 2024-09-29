@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   aiMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FFC107',
+    backgroundColor: '#ff5757',
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,

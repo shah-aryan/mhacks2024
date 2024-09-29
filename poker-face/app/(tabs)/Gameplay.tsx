@@ -39,7 +39,7 @@ const gameplayHistory = [
     profit: 0,
     loss: 50,
     netVsExpected: '0.8X',
-    performanceRating: 2,
+    performanceRating: 1,
     summary: 'Underestimated opponents, missed key opportunities.',
     rounds: [
       {
