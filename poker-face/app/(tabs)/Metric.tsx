@@ -1,101 +1,118 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { View, Button, Text, Image } from 'react-native';
-import { Camera, CameraType } from 'expo-camera/legacy';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import React, { useState } from 'react';
 
-const CameraStream = () => {
-  const cameraRef = useRef<Camera | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null)
-  
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
-  const sendFrame = async (uri: any) => {
-    const formData = new FormData();
-    const file = {
-      uri,
-      name: 'image.jpg',
-      type: 'image/jpeg',
-    };
-    formData.append('file', new File([file], 'image.jpg', { type: 'image/jpeg' }));
-
-    try {
-      const response = await fetch('http://35.3.49.209:8000/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'File upload failed');
-      }
-      console.log('Upload successful:', data);
-    } catch (error) {
-      console.error('Error sending frame:', error);
-    }
-  };
-
-  const handleCameraStream = async () => {
-    if (cameraRef.current) {
-      try {
-        const options = {
-          quality: 0.5,
-          base64: true,
-          skipProcessing: false, // Skip additional processing for faster capture
-        };
-        const data = await cameraRef.current.takePictureAsync(options);
-        console.log('Captured image:', data.uri);
-        setCapturedImage(data.uri); // Display the captured image
-        sendFrame(data.uri); // Send the image URI to the backend
-        setTimeout(handleCameraStream, 2000); // Repeat after a short delay
-      } catch (error) {
-        console.error('Error capturing image:', error);
-        // Alert.alert('Error', 'Failed to capture image');
-      }
-    }
-  };
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRecording) {
-      interval = setInterval(() => {
-        handleCameraStream(); // Capture an image every second
-      }, 1000);
-    }
-    return () => clearInterval(interval); // Cleanup on unmount or when isRecording changes
-  }, [isRecording]);
-
-  if (hasPermission === null) {
-    return <Text>Requesting for camera permission</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
+export default function PokerMetricsScreen() {
+  const [showMetrics, setShowMetrics] = useState(false);
+  const [metrics, setMetrics] = useState({
+    totalHands: 150,
+    handsWon: 75,
+    winRate: '50%',
+    totalProfit: 1200,
+    averageBet: 50,
+    favoriteHand: 'AA',
+  });
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
-        <Camera ref={cameraRef} style={{ flex: 1 }} type={CameraType.back} />
+    <View style={styles.background}>
+      <View style={styles.header}>
+        <ThemedText style={styles.title}>Poker Metrics</ThemedText>
+        <TouchableOpacity onPress={() => setShowMetrics(!showMetrics)}>
+          <Ionicons name={showMetrics ? "chevron-up" : "chevron-down"} size={24} color="white" />
+        </TouchableOpacity>
       </View>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Button
-          title={isRecording ? 'Stop Streaming' : 'Start Streaming'}
-          onPress={() => setIsRecording(prev => !prev)}
-        />
-        {capturedImage && ( // Conditionally render the Image component
-          <Image
-            source={{ uri: capturedImage }}
-            style={{ width: 200, height: 200 }} // Adjust size as needed
-          />
-        )}
-      </View>
+
+      {showMetrics && (
+        <View style={styles.metricsContainer}>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Total Hands Played:</ThemedText>
+            <ThemedText style={styles.metricValue}>{metrics.totalHands}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Hands Won:</ThemedText>
+            <ThemedText style={styles.metricValue}>{metrics.handsWon}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Win Rate:</ThemedText>
+            <ThemedText style={styles.metricValue}>{metrics.winRate}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Total Profit:</ThemedText>
+            <ThemedText style={styles.metricValue}>${metrics.totalProfit}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Average Bet:</ThemedText>
+            <ThemedText style={styles.metricValue}>${metrics.averageBet}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Favorite Hand:</ThemedText>
+            <ThemedText style={styles.metricValue}>{metrics.favoriteHand}</ThemedText>
+          </ThemedView>
+        </View>
+      )}
+
+      <TouchableOpacity style={styles.button} onPress={() => console.log('Navigate to Hand History')}>
+        <ThemedText style={styles.buttonText}>View Hand History</ThemedText>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => console.log('Show Recommendations')}>
+        <ThemedText style={styles.buttonText}>Get Playing Recommendations</ThemedText>
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
-export default CameraStream;
+const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    backgroundColor: Colors.Black,
+    padding: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 40, // Increased margin to move header down
+    marginTop: 50, // Added marginTop to create space above
+  },
+  title: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  metricsContainer: {
+    backgroundColor: '#1D3D47',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+  },
+  metric: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  metricTitle: {
+    color: '#E0E0E0',
+    fontSize: 18,
+  },
+  metricValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  button: {
+    backgroundColor: '#3B3B3B',
+    borderRadius: 5,
+    padding: 15,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
