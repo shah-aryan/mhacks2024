@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   aiMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#ff5757',
+    backgroundColor: Colors.Grey,
     borderRadius: 10,
     padding: 10,
     marginVertical: 5,
