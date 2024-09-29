@@ -1,0 +1,232 @@
+{
+    "data": [
+      "output",
+      {
+        "node": {
+          "id": "output",
+          "type": "output",
+          "configuration": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "output": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "role": {
+                            "type": "string",
+                            "enum": ["user", "model", "tool"]
+                          },
+                          "parts": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "anyOf": [
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "text": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": ["text"],
+                                  "additionalProperties": false
+                                },
+                                {
+                                  "type": "object",
+                                  "properties": {
+                                    "functionCall": {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "args": {
+                                          "type": "object",
+                                          "properties": {},
+                                          "required": [],
+                                          "additionalProperties": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      },
+                                      "required": ["name", "args"],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "required": ["functionCall"],
+                                  "additionalProperties": false
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "required": ["parts"],
+                        "additionalProperties": false,
+                        "behavior": ["llm-content"]
+                      },
+                      {
+                        "type": "object",
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string",
+                                "enum": ["$metadata"]
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": ["looper"]
+                              },
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "max": {
+                                    "type": "number"
+                                  },
+                                  "todo": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "task": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": ["task"],
+                                      "additionalProperties": false
+                                    }
+                                  },
+                                  "doneMarker": {
+                                    "type": "string"
+                                  },
+                                  "done": {
+                                    "type": "boolean"
+                                  },
+                                  "appendLast": {
+                                    "type": "boolean"
+                                  },
+                                  "returnLast": {
+                                    "type": "boolean"
+                                  },
+                                  "next": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": ["role", "type", "data"],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string",
+                                "enum": ["$metadata"]
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": ["split"]
+                              },
+                              "data": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": ["start", "next", "end"]
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": ["type", "id"],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": ["role", "type", "data"],
+                            "additionalProperties": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "required": ["output"],
+                "behavior": ["llm-content"]
+              },
+              "title": "Output",
+              "description": "The output to display"
+            }
+          },
+          "required": ["output"],
+          "behavior": ["bubble"]
+        },
+        "metadata": {
+          "title": "Output",
+          "description": "Displaying the output to the user."
+        },
+        "outputs": {
+          "output": [
+            {
+              "role": "user",
+              "parts": [
+                {
+                  "text": "This user really respects short but tangible feedback that they can apply in their next poker game, ideally justified by GTO strategy. This user does not want any feedback or general advice, only things that directly apply to the specific situation and the decision they should make from it. do not ask for more information, just use the information that the user provides and provide advice relevant to it."
+                },
+                {
+                  "text": "Provide concise answers to the user's question while justifying it strategically."
+                }
+              ]
+            },
+            {
+              "parts": [
+                {
+                  "text": "Understood. I will provide short, actionable feedback grounded in GTO strategy, directly addressing your specific situation without requesting further information.\n\nPlease provide me with the specific poker situation you'd like advice on. For example:\n\n* **Your hand:**\n* **The action so far:**\n* **Your position:**\n* **The pot size:**\n* **The betting history:**\n* **Your question/decision:**\n"
+                }
+              ],
+              "role": "model"
+            }
+          ]
+        }
+      }
+    ],
+    "rawData": {
+      "data": [
+        "input",
+        {
+          "node": {
+            "id": "input",
+            "type": "input"
+          },
+          "inputArguments": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "title": "You",
+                  "description": "Talk to Poker Genius",
+                  "type": "object",
+                  "behavior": ["transient", "llm-content"],
+                  "examples": [
+                    "{\"parts\":[{\"text\":\"\"}]}"
+                  ]
+                }
+              }
+            }
+          },
+          "path": [3, 14],
+          "bubbled": true,
+          "timestamp": 25955851.997328
+        },
+        "Ct5DcX5KG0DFjQK8gCyh"
+      ]
+    }
+  }
