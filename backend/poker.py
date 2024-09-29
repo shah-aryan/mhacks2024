@@ -61,10 +61,10 @@ class PokerGame:
 
     def get_state(self, img):
         res = infer_image(img)
-        # self.pot_size = self.parse_bal(res['pot'])
-        # self.balance = self.parse_bal(res['my_stack'])
-        # self.board = res['board']
-        # self.player_hand = res['hand']
+        self.pot_size = self.parse_bal(res['pot'])
+        self.balance = self.parse_bal(res['my_stack'])
+        self.board = res['board']
+        self.player_hand = res['hand']
 
     def preflop_ev(self, position):
         # Parse the card combination (formatted suited or unsuited)
@@ -95,7 +95,7 @@ class PokerGame:
             self.board = ['AD','3D','QD']
         if len(self.player_hand) < 2:
             self.player_hand = ['AS','QS']
-        self.seen_cards = set(self.player_hand)
+            self.seen_cards = set(self.player_hand)
         self.seen_cards.update(self.board)
         remaining_cards = [card for card in deck if card not in self.seen_cards]
         hand_card_obj = [eval7.Card(c[0] + c[1].lower()) for c in self.seen_cards]

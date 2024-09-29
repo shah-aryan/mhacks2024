@@ -85,15 +85,19 @@ def infer_image(image_input):
     with open('image_input.txt', 'w') as f:
         f.write(image_input)
 
-    try:
-        # Check if it's a base64 image string by splitting at comma
-        if "," in image_input:
-            base64_content = image_input.split(",")[1]
-        base64_content = image_input
-        decoded_data = base64.b64decode(base64_content, validate=True)
-        image = Image.open(io.BytesIO(decoded_data))
-    except (IndexError, base64.binascii.Error) as e:
-        print(f"error: Failed to decode the base64 image string.")
+    
+    # Check if it's a base64 image string by splitting at comma
+    if "," in image_input:
+        base64_content = image_input.split(",")[1]
+    base64_content = image_input
+    decoded_data = base64.b64decode(base64_content, validate=True)
+    image = Image.open(io.BytesIO(decoded_data))
+
+    #rotate image by 90 degrees
+    image = image.rotate(270, expand=True)
+
+    #save image to test-images
+    image.save('test-images/test.jpg')
 
     # Continue processing the 
     top_half, bottom_half = split_image(image)

@@ -21,11 +21,11 @@ export default function TabTwoScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null)
 
-  const [hero, setHero] = useState<number>(123);
-  const [pot, setPot] = useState<number>(1322);
+  const [hero, setHero] = useState<number>(100);
+  const [pot, setPot] = useState<number>(1000);
   const [potMult, setPotMult] = useState<number>(10);
 
-  const [rounds, setRounds] = useState<string[]>(["Pre-Flop", "Flop", "Turn", "River"]);
+  const [rounds, setRounds] = useState<string[]>(["Preflop", "Flop", "Turn", "River"]);
   const [roundsIndex, setRoundsIndex] = useState<number>(0);
   const [action, setAction] = useState<string>("raise");
   const [raiseAmount, setRaiseAmount] = useState<number>(10);
@@ -49,6 +49,7 @@ export default function TabTwoScreen() {
   const [potOdds, setPotOdds] = useState<number>(0.56)
 
   const [isCamMode, setIsCamMode] = useState<boolean>(false);
+  
   useEffect(() => {
     setPotMult(pot/hero);
   }, [hero, pot]);
@@ -64,43 +65,82 @@ export default function TabTwoScreen() {
     setPotentialDraws([{draw: "Flush", probability: 35}, {draw: "Straight", probability: 10}])
   }, []);
 
-  const sendFrame = async (uri: any) => {
-    const formData = new FormData();
-    const file = {
-      uri,
-      name: 'image.jpg',
-      type: 'image/jpeg',
-    };
-    formData.append('file', new File([file], 'image.jpg', { type: 'image/jpeg' }));
+  const sendPredictionRequest = async () => {
+
 
     try {
-      const response = await fetch('http://35.3.49.209:8000/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'File upload failed');
-      }
-      //console.log('Upload successful:', data);
+        const response = await fetch('http://localhost:8000/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to predict');
+        }
+
+        const result = await response.json();
+        console.log('Prediction result:', result);
     } catch (error) {
-      //console.error('Error sending frame:', error);
+        console.error('Error:', error);
     }
+};
+
+
+const sendFrame = async (data: any) => {
+  const file = {
+    image: data, // e.g. base64 encoded image string
+    game_stage: rounds[roundsIndex].toLowerCase(),   // e.g. "preflop", "flop", "turn", "river"
   };
+
+  try {
+    const response = await fetch('http://35.3.113.147:8000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',  // Specify JSON content type
+      },
+      body: JSON.stringify(file),
+    });
+    
+    const data = await response.text();
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data) || 'File upload failed');
+    }
+    
+    console.log('Upload successful:', data);
+    return data;
+  } catch (error) {
+    console.error('Error sending frame:', error);
+  }
+};
+
 
   const handleCameraStream = async () => {
     if (cameraRef.current) {
       try {
         const options = {
-          quality: 0.5,
+          quality: 0.7,
           base64: true,
           skipProcessing: false, // Skip additional processing for faster capture
+          pictureSize: '1920x1080',
         };
         const data = await cameraRef.current.takePictureAsync(options);
         console.log('Captured image:', data.uri);
         setCapturedImage(data.uri); // Display the captured image
-        sendFrame(data.uri); // Send the image URI to the backend
-        setTimeout(handleCameraStream, 2000); // Repeat after a short delay
+        const response:any = await sendFrame(data.base64);
+        setHero(response?.user_value)
+        setPot(response?.pot_value)
+        setCardData(response?.user_card_data )
+        setTableData(response?.table_card_data)
+        setBetThreshold(response?.bet_threshold )
+        setEV(response?.ev || EV)
+        setEquity(response?.equity || equity)
+        
+        console.log(response)
+        
+        setTimeout(handleCameraStream, 10000); // Repeat after a short delay
       } catch (error) {
         console.error('Error capturing image:', error);
         //Alert.alert('Error', 'Failed to capture image');
@@ -113,7 +153,7 @@ export default function TabTwoScreen() {
     if (isRecording) {
       interval = setInterval(() => {
         handleCameraStream(); // Capture an image every second
-      }, 3000);
+      }, 10000);
     }
     return () => clearInterval(interval); // Cleanup on unmount or when isRecording changes
   }, [isRecording]);
@@ -136,28 +176,6 @@ export default function TabTwoScreen() {
 
       ) : (
     <View className="flex-1 pt-16 px-5" style={styles.background}>
-
-      {/*<View className='flex-row justify-center items-center px-5 h-10 rounded-full bg-gray-700'>*/}
-      {/*  <ThemedText className="text-xl font-bold text-white">{rounds[roundsIndex]}</ThemedText>*/}
-      {/*</View>*/}
-
-      {/*<View className="flex-row justify-between">*/}
-      {/*  <View>*/}
-      {/*    <ThemedText className="text-4xl font-bold text-white">Hero</ThemedText>*/}
-      {/*    <View className='flex-row items-center'>*/}
-      {/*      <ThemedText className="text-4xl font-bold text-white">${hero}</ThemedText>*/}
-      {/*      <View className='flex-row justify-center items-center px-1 py-1 rounded-full bg-gray-700 ml-3'>*/}
-      {/*        <ThemedText className=" font-bold text-white">{potMult.toFixed(1)}X</ThemedText>*/}
-      {/*      </View>*/}
-      {/*    </View>*/}
-      {/*  </View>*/}
-      {/*  */}
-      {/*  <View>*/}
-      {/*    <ThemedText className="text-4xl font-bold text-white text-right">Pot</ThemedText>*/}
-      {/*    <ThemedText className="text-4xl font-bold text-white">${pot}</ThemedText>*/}
-      {/*  </View>*/}
-      {/*</View>*/}
-
       <View className="flex-row justify-between items-center">
         <ThemedText className="text-4xl font-bold text-white w-1/3">Hero</ThemedText>
         <View className='flex-row justify-center items-center px-3 h-10 rounded-full bg-gray-700 w-1/3'>
@@ -231,13 +249,13 @@ export default function TabTwoScreen() {
                       </View>
                     </View>
                     ) : (
-                    <View className="flex-row justify-between items-center mt-3 gap-2">
+                    <View className="flex-row justify-center items-center">
                       <View className="flex-col justify-center items-center p-5 bg-gray-700 rounded-3xl">
                         <ThemedText className="text-xl font-bold text-white">Equity</ThemedText>
                         <ThemedText className="text-xl font-bold text-white">{equity}</ThemedText>
                       </View>
 
-                      <View className="flex-col justify-center items-center p-5 bg-gray-700 rounded-3xl">
+                      {/* <View className="flex-col justify-center items-center p-5 bg-gray-700 rounded-3xl">
                         <ThemedText className="text-xl font-bold text-white">Pot Odds</ThemedText>
                         <ThemedText className="text-xl font-bold text-white">{potOdds}</ThemedText>
                       </View>
@@ -256,7 +274,7 @@ export default function TabTwoScreen() {
 
                           </View>
                         ))}
-                      </ScrollView>
+                      </ScrollView> */}
                     </View>
                   )}
 

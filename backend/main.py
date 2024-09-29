@@ -1,31 +1,63 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from typing import Optional
-from cv import infer_image
-from poker import PokerGame
+from cv import infer_image  # Assuming this is a custom module
+from poker import PokerGame  # Assuming this is a custom module
+from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 app = FastAPI()
-
 game = None
+
+# Define lifespan context to handle startup and shutdown
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global game
+    # Startup logic: initialize the PokerGame when the app starts
+    game = PokerGame()
+    small_blind = 1
+    big_blind = 2
+    game.get_blinds(small_blind, big_blind)
+    print("Poker game initialized on startup.")
+    
+    # Hand over control to the application
+    yield
+    
+    # Shutdown logic (optional): Add cleanup code here if necessary
+    print("Shutdown event triggered. Cleaning up resources.")
+
+# Pass the lifespan context to the FastAPI app
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to my FastAPI backend!"}
+    print("Welcome to my FastAPI backend!")
+    return {"message": "Welcome to my FastAPI backend! hi sanjit"}
 
-@app.get("/init")
-def init_endpoint(small_blind: int, big_blind: int):
-    global game
-    game = PokerGame()
-    game.get_blinds(small_blind, big_blind)
-    return {"status": "success"}
+# Define the model for the request body
+class PredictRequest(BaseModel):
+    image: str
+    game_stage: str
 
-# game stage: preflop, flop, turn, river
-# image: base64 encoded image
-@app.get("/predict")
-def predict_endpoint(game_stage: str, image: str, position: str, chip_denominations: Optional[list] = None):
+
+@app.post("/echo")
+def echo_endpoint(message: str):
+    print(f"Received message: {message}")
+
+
+@app.post("/predict")
+def predict_endpoint(
+    image: str = Body(..., embed=True),
+    game_stage: str = Body(..., embed=True)
+):
+    print("Predicting...")
+    position = 'BB'
     global game
+
     if game_stage not in ["preflop", "flop", "turn", "river"]:
         raise HTTPException(status_code=400, detail="Invalid game_stage. Must be 'preflop', 'flop', 'turn', or 'river'.")
-    #game.get_state(image)
+
+    game.get_state(image)  # Uncomment if needed
+    
     if game_stage == "preflop":
         ev = game.preflop_ev(position)
 
@@ -52,7 +84,6 @@ def predict_endpoint(game_stage: str, image: str, position: str, chip_denominati
             "hand_type": game.get_hand_type(),
             "status": "success"
         }
- 
 
 @app.get("/test")
 def test_endpoint():
