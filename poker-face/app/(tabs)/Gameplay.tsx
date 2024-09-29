@@ -1,167 +1,355 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Image, StyleSheet, Platform, View, Button, Text, Modal, TextInput } from 'react-native';
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, Text, View, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Camera, CameraType } from 'expo-camera';
-import {Colors} from '@/constants/Colors';
+import { Colors } from '@/constants/Colors';
+import { FontAwesome } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import CardView from '@/components/CardView'; // Import the CardView component
 
-export default function PotOdds() {
-  // const cameraRef = useRef<Camera | null>(null);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  interface Decision {
-    player: string;
-    action: string;
-    amount: string;
-    timestamp: string;
-  }
+// Sample data for gameplay history with multiple hands and rounds in a session
+const gameplayHistory = [
+  {
+    date: '2024-09-25',
+    buyIn: 100,
+    profit: 50,
+    loss: 0,
+    netVsExpected: '1.2X',
+    performanceRating: 4,
+    summary: 'Played aggressively, capitalized on opponents’ mistakes.',
+    rounds: [
+      {
+        playerHand: ['AH', 'KH'],
+        flop: ['2D', '4H', '9C'],
+        turn: ['7S'],
+        river: ['JC'],
+      },
+      {
+        playerHand: ['10D', 'JC'],
+        flop: ['3H', '5C', '8D'],
+        turn: ['KH'],
+        river: ['4S'],
+      },
+    ],
+  },
+  {
+    date: '2024-09-20',
+    buyIn: 50,
+    profit: 0,
+    loss: 50,
+    netVsExpected: '0.8X',
+    performanceRating: 2,
+    summary: 'Underestimated opponents, missed key opportunities.',
+    rounds: [
+      {
+        playerHand: ['7C', '8D'],
+        flop: ['3H', '4C', '5D'],
+        turn: ['6S'],
+        river: ['KD'],
+      },
+    ],
+  },
+  {
+    date: '2024-09-15',
+    buyIn: 200,
+    profit: 100,
+    loss: 0,
+    netVsExpected: '1.5X',
+    performanceRating: 5,
+    summary: 'Excellent reads on opponents, high risk rewarded.',
+    rounds: [
+      {
+        playerHand: ['9S', '10S'],
+        flop: ['AS', '2C', '3D'],
+        turn: ['QH'],
+        river: ['JS'],
+      },
+      {
+        playerHand: ['AS', '2C'],
+        flop: ['4D', '5H', '6S'],
+        turn: ['7C'],
+        river: ['8D'],
+      },
+    ],
+  },
+];
+
+export default function PokerMetricsScreen() {
+  const [showMetrics, setShowMetrics] = useState(false);
+  const [showHandDetails, setShowHandDetails] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false); 
+  const [selectedHand, setSelectedHand] = useState(null); // For showing specific round details
+
+  const getPerformanceGradient = (rating: number): string[] => {
+    if (rating >= 4) {
+      return ['#4CAF50', '#2E7D32']; // Darker green shades for high performance
+    } else if (rating >= 2) {
+      return ['#FBC02D', '#F57F17']; // Darker yellow shades for average performance
+    } else {
+      return ['#E57373', '#C62828']; // Darker red shades for low performance
+    }
+  };
   
-  const [decisions, setDecisions] = useState<Decision[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newDecision, setNewDecision] = useState({ player: '', action: '', amount: '' });
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
-
-  const addDecision = () => {
-    setDecisions([...decisions, { ...newDecision, timestamp: new Date().toLocaleTimeString() }]);
-    setNewDecision({ player: '', action: '', amount: '' });
-    setModalVisible(false);
+  const handleViewHandDetails = (round: any) => {
+    setSelectedHand(round);
+    setShowHandDetails(true);
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: Colors.inactiveColor}}
-      headerImage={
-      <View style={styles.headerImageContainer}>
-        <Image
-        source={require('@/assets/images/images.png')}
-        style={styles.reactLogo}
-        />
+    <View style={styles.background}>
+      <View style={styles.header}>
+        <ThemedText style={styles.title}>Gameplay History</ThemedText>
+        {/* <TouchableOpacity onPress={() => setShowMetrics(!showMetrics)}>
+          <Ionicons name={showMetrics ? "chevron-up" : "chevron-down"} size={24} color="white" />
+        </TouchableOpacity> */}
       </View>
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-      </ThemedView>
 
-      {/* Poker Decisions UI */}
-      <ThemedView style={styles.decisionsContainer}>
-        <Text style={styles.headerText}>Poker Game Decisions</Text>
-        <Button title="Add Decision" onPress={() => setModalVisible(true)} />
-        {decisions.map((decision, index) => (
-          <View key={index} style={styles.decisionRow}>
-            <Text style={styles.text}>{decision.player}</Text>
-            <Text style={styles.text}>{decision.action}</Text>
-            <Text style={styles.text}>{decision.amount}</Text>
-            <Text style={styles.text}>{decision.timestamp}</Text>
-          </View>
+      {showMetrics && (
+        <View style={styles.metricsContainer}>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Total Hands Played:</ThemedText>
+            <ThemedText style={styles.metricValue}>{150}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Hands Won:</ThemedText>
+            <ThemedText style={styles.metricValue}>{75}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Win Rate:</ThemedText>
+            <ThemedText style={styles.metricValue}>50%</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Total Profit:</ThemedText>
+            <ThemedText style={styles.metricValue}>${1200}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Average Bet:</ThemedText>
+            <ThemedText style={styles.metricValue}>${50}</ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.metric}>
+            <ThemedText style={styles.metricTitle}>Favorite Hand:</ThemedText>
+            <ThemedText style={styles.metricValue}>AA</ThemedText>
+          </ThemedView>
+        </View>
+      )}
+
+      {/* Gameplay History Section */}
+      {/* <Text style={styles.historyTitle}>Gameplay History</Text> */}
+      <Text style={styles.historyTitle}>Gameplay History</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {gameplayHistory.map((game, index) => (
+          <LinearGradient 
+            key={index} 
+            colors={getPerformanceGradient(game.performanceRating)} // Use the color function
+            style={styles.card}
+          >
+            <Text style={styles.cardTitle}>{game.date}</Text>
+            <Text style={styles.cardText}>Buy In: ${game.buyIn}</Text>
+            <Text style={styles.cardText}>Profit: ${game.profit}</Text>
+            <Text style={styles.cardText}>Loss: ${game.loss}</Text>
+            <Text style={styles.cardText}>Net vs Expected: {game.netVsExpected}</Text>
+            <View style={styles.ratingContainer}>
+              <FontAwesome name="star" size={24} color="#FFD700" style={styles.ratingIcon} />
+              <Text style={styles.ratingText}>{game.performanceRating}</Text>
+            </View>
+            <Text style={styles.cardText}>Summary: {game.summary}</Text>
+            {game.rounds.map((round, roundIndex) => (
+              <TouchableOpacity 
+                key={roundIndex}
+                style={styles.cardButton} 
+                onPress={() => handleViewHandDetails(round)}
+              >
+                <ThemedText style={styles.cardButtonText}>View Round {roundIndex + 1}</ThemedText>
+              </TouchableOpacity>
+            ))}
+          </LinearGradient>
         ))}
-      </ThemedView>
+      </ScrollView>
 
-      {/* Modal for Adding Decisions */}
-      <Modal animationType="slide" transparent={true} visible={modalVisible}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalHeader}>Add New Decision</Text>
-          <TextInput
-            placeholder="Player"
-            value={newDecision.player}
-            onChangeText={(text) => setNewDecision({ ...newDecision, player: text })}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Action (e.g. Call, Raise, Fold)"
-            value={newDecision.action}
-            onChangeText={(text) => setNewDecision({ ...newDecision, action: text })}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Amount"
-            value={newDecision.amount}
-            onChangeText={(text) => setNewDecision({ ...newDecision, amount: text })}
-            style={styles.input}
-            keyboardType="numeric"
-          />
-          <Button title="Add" onPress={addDecision} />
-          <Button title="Cancel" onPress={() => setModalVisible(false)} />
+      
+      <TouchableOpacity style={styles.button} onPress={() => setShowRecommendations(true)}>
+        <ThemedText style={styles.buttonText}>Get General Trend Recommendations</ThemedText>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => console.log('Navigate to Hand History')}>
+        <ThemedText style={styles.buttonText}>View Detailed Hand History</ThemedText>
+      </TouchableOpacity>
+
+      <Modal visible={showHandDetails} animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <ThemedText style={styles.modalTitle}>Hand Details</ThemedText>
+            {selectedHand && (
+              <>
+                <ThemedText style={styles.modalHandTitle}>Player Hand:</ThemedText>
+                <CardView cardsData={selectedHand.playerHand} />
+                <ThemedText style={styles.modalHandTitle}>Flop:</ThemedText>
+                <CardView cardsData={selectedHand.flop} />
+                <ThemedText style={styles.modalHandTitle}>Turn:</ThemedText>
+                <CardView cardsData={selectedHand.turn} />
+                <ThemedText style={styles.modalHandTitle}>River:</ThemedText>
+                <CardView cardsData={selectedHand.river} />
+              </>
+            )}
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => setShowHandDetails(false)}
+            >
+              <ThemedText style={styles.buttonText}>Close</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
-    </ParallaxScrollView>
+
+      {/* Recommendations Modal */}
+      <Modal visible={showRecommendations} animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <ThemedText style={styles.modalTitle}>General Trend Recommendations</ThemedText>
+            <ThemedText style={styles.modalText}>1. Play aggressively in early positions.</ThemedText>
+            <ThemedText style={styles.modalText}>2. Review hands where you lost more than 50% of your stack.</ThemedText>
+            <ThemedText style={styles.modalText}>3. Focus on improving your reads on opponents.</ThemedText>
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              onPress={() => setShowRecommendations(false)}
+            >
+              <ThemedText style={styles.buttonText}>Close</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImageContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
+  background: {
+    flex: 1,
+    backgroundColor: Colors.Black,
+    padding: 10,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    justifyContent: 'center', // Center the content horizontally
-  },
-  decisionsContainer: {
-    backgroundColor: '#1D3D47', // Dark background
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  decisionRow: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff', // Light text for dark background
-    marginBottom: 10,
-  },
-  text: {
-    color: '#fff', // Light text color
-    flex: 1,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: '#1D3D47', // Dark background for modal
-    borderRadius: 10,
-    padding: 35,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    marginVertical: 40,
+    marginTop: 70,
   },
-  modalHeader: {
-    fontSize: 20,
+  title: {
+    fontSize: 30,
     fontWeight: 'bold',
-    color: '#fff', // Light text color
+    color: '#FFFFFF',
+    padding: 10,
+  },
+  metricsContainer: {
+    backgroundColor: '#1D3D47',
+    borderRadius: 10,
+    padding: 20,
     marginBottom: 20,
   },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 15,
-    paddingLeft: 10,
-    width: '80%',
-    backgroundColor: '#fff', // Light background for input fields
-    borderRadius: 5,
+  metric: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
   },
-  reactLogo: {
-    height: 200, // Smaller height
-    width: 200, // Smaller width
+  metricTitle: {
+    color: '#E0E0E0',
+    fontSize: 18,
+  },
+  metricValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  historyTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginVertical: 20,
+  },
+  card: {
+    backgroundColor: '#2D3E50',
+    borderRadius: 10,
+    padding: 15,
+    marginRight: 10,
+    width: 250,
+    elevation: 5,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#E0E0E0',
+  },
+  cardText: {
+    color: '#FFFFFF',
+    marginTop: 5,
+  },
+  cardButton: {
+    backgroundColor: '#3B3B3B',
+    borderRadius: 5,
+    padding: 5,
+    marginTop: 10,
+  },
+  cardButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#3B3B3B',
+    borderRadius: 5,
+    padding: 15,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Half-transparent background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: Colors.Black,
+    borderRadius: 10,
+    padding: 20,
+    width: '80%', // Width of the modal
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#E0E0E0',
+    marginBottom: 15,
+  },
+  modalText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginVertical: 5,
+  },
+  modalButton: {
+    backgroundColor: '#3B3B3B',
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  handContainer: {
+    marginTop: 15,
+    marginBottom: 15,
+    maxHeight: '50%', // Limit height of hand history display
+    width: '100%', // Make sure it occupies full width
+  },
+  modalHandTitle: {
+    color: '#E0E0E0',
+    fontSize: 18,
+    marginVertical: 5,
   },
 });

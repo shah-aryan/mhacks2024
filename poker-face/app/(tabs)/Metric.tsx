@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     marginTop: 50, // Added marginTop to create space above
   },
   title: {
+    padding: 20,
     fontSize: 30,
     fontWeight: 'bold',
     color: '#FFFFFF',
