@@ -25,7 +25,7 @@ export const Colors = {
   },
   inactiveColor: "#8E8E8E",
   themecolor: "#2B2D2F",
-  tabcolor: "#E54B4B",
+  tabcolor: "#fff",
   Red: "#FF4848",
   Black: "#262525",
   Grey: "#393939", 
