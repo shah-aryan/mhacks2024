@@ -208,9 +208,9 @@ export default function PokerMetricsScreen() {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <ThemedText style={styles.modalTitle}>General Trend Recommendations</ThemedText>
-            <ThemedText style={styles.modalText}>1. Play aggressively in early positions.</ThemedText>
-            <ThemedText style={styles.modalText}>2. Review hands where you lost more than 50% of your stack.</ThemedText>
-            <ThemedText style={styles.modalText}>3. Focus on improving your reads on opponents.</ThemedText>
+            <ThemedText style={styles.modalText}>1. Don't overestimate draws when a lot of money is at stake. Folding in the 9/20 game, where you had an open-ended straight draw, is often the correct play when a large bet is in front of you. Beginners chase draws too often.</ThemedText>
+            <ThemedText style={styles.modalText}>2. Be wary of overplaying top pair. While top pair is a decent hand, it is vulnerable. Analyze the board texture and your opponent's betting pattern ebfore committing too many chips with top pair.</ThemedText>
+            <ThemedText style={styles.modalText}>3. Understand position is powerful. Acting last gives you more information to base your decisions on. Try to play more hands when you are in late position.</ThemedText>
             <TouchableOpacity 
               style={styles.modalButton} 
               onPress={() => setShowRecommendations(false)}
