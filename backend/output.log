@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/Users/aryanshah/hackathons/mhacks2024/backend/test.py", line 10, in <module>
+    predict_endpoint('preflop', encoded_image, 'BB', [1,2,5,10])
+  File "/Users/aryanshah/hackathons/mhacks2024/backend/main.py", line 28, in predict_endpoint
+    game.get_state(image)
+  File "/Users/aryanshah/hackathons/mhacks2024/backend/poker.py", line 59, in get_state
+    res = infer_image(img)
+  File "/Users/aryanshah/hackathons/mhacks2024/backend/cv.py", line 101, in infer_image
+    top_half, bottom_half = split_image(image)
+  File "/Users/aryanshah/hackathons/mhacks2024/backend/cv.py", line 18, in split_image
+    width, height = image.size
+AttributeError: 'str' object has no attribute 'size'

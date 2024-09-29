@@ -1,3 +1,6 @@
+backend/test
+backend/train
+backend/valid
 # Logs
 logs
 *.log
