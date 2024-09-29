@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["Om Joshi <39465356+backpack455@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.3"
+inference-sdk = "^0.21.0"
+python-dotenv = "^1.0.1"
+uvicorn = "^0.31.0"
+opencv-python = "^4.10.0.84"
+fastapi = {extras = ["standard"], version = "^0.115.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

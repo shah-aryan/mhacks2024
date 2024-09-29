@@ -347,6 +347,17 @@ const styles = StyleSheet.create({
     maxHeight: '50%', // Limit height of hand history display
     width: '100%', // Make sure it occupies full width
   },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  ratingText: {
+    color: '#FFD700',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 5,
+  },
   modalHandTitle: {
     color: '#E0E0E0',
     fontSize: 18,
