@@ -1,0 +1,14 @@
+{
+  "user_value": 123,
+  "pot_value": 1322,
+  "user_card_data": ["AH", "9S"],
+  "table_card_data": ["AH", "9S"],
+  "bet_thresholds": [5, 10, 3],
+  "expected_value": 0.35,
+  "equity": 0.7,
+  "pot_odds": 0.56,
+  "potential_draws": [
+    {"draw":  "Flush", "equity": 35},
+    {"draw":  "Straight", "equity": 10}
+  ]
+}
